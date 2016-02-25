@@ -38,3 +38,40 @@ Parse.Cloud.beforeSave("GCUR_OBSERVATION", function(request, response) {
 	} else
 		response.success();
 });
+
+/**
+ * Retrieve all Finalise Date based on the "createdAt" column of the GCUR_FINALISEMODEL class
+ */
+Parse.Cloud.define("getAllFinalisedDate", function(request, response) {
+	Parse.Cloud.useMasterKey();
+	
+	var finaliseModelList = [];
+	
+	var queryFinaliseModel = new Parse.Query("GCUR_FINALISEMODEL");
+	queryFinaliseModel.ascending("createdAt");
+	queryFinaliseModel.equalTo("jobResult", true);
+	queryFinaliseModel.select("jobResult");
+	queryFinaliseModel.limit(1000);
+	
+	queryFinaliseModel.find().then(function(results) {
+		for (var i = 0; i < results.length; i ++) {
+			var finaliseModel = results[i];
+			
+			var jobResult = finaliseModel.get("jobResult");
+			var jobId = finaliseModel.id;
+			var createdDate = finaliseModel.createdAt;
+			
+			var finaliseModelObj = {
+					"jobId": jobId,
+					"jobResult": jobResult,
+					"createdDate": createdDate
+			};
+			
+			finaliseModelList.push(finaliseModelObj);
+		}
+	}).then(function() {
+	    response.success(finaliseModelList);
+	}, function(error) {
+		response.error("Error: " + error.code + " " + error.message);
+	});
+});
