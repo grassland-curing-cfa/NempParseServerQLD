@@ -15,6 +15,8 @@ Parse.Cloud.beforeSave("GCUR_OBSERVATION", function(request, response) {
 		console.log("*** FLAG 2");
 		var sharedJurisSettingsQ = new Parse.Query("GCUR_SHARED_JURIS_SETTINGS");
 		console.log("*** FLAG 21");
+
+/*
 		sharedJurisSettingsQ.find().then(function(sjsObjs) {
 			console.log("*** FLAG 22");
 			for (var i = 0; i < sjsObjs.length; i ++) {
@@ -39,6 +41,11 @@ Parse.Cloud.beforeSave("GCUR_OBSERVATION", function(request, response) {
 			console.log("*** FLAG 3");
 			response.success();
 		});
+*/
+		request.object.set("SharedBy", "HELLO WORLD");
+		console.log("*** FLAG 31");
+		response.success();
+
 	} else {
 		console.log("*** FLAG 4");
 		response.success();
