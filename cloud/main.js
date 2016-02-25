@@ -10,9 +10,9 @@ Parse.Cloud.beforeSave("GCUR_OBSERVATION", function(request, response) {
 	console.log("*** beforeSave on GCUR_OBSERVATION called");
 	Parse.Cloud.useMasterKey();
 	sharedWithJurisArr = [];
-	
+	console.log("*** FLAG 1");
 	if(!request.object.existed()) {
-		
+		console.log("*** FLAG 2");
 		var sharedJurisSettingsQ = new Parse.Query("GCUR_SHARED_JURIS_SETTINGS");
 		
 		sharedJurisSettingsQ.find().then(function(sjsObjs) {
@@ -32,11 +32,13 @@ Parse.Cloud.beforeSave("GCUR_OBSERVATION", function(request, response) {
 			}
 			
 			request.object.set("SharedBy", JSON.stringify(sharedByArr));
-			
+			console.log("*** FLAG 3");
 			response.success();
 		});
-	} else
+	} else {
+		console.log("*** FLAG 4");
 		response.success();
+	}
 });
 
 /**
