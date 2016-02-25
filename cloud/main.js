@@ -88,3 +88,18 @@ Parse.Cloud.define("getAllFinalisedDate", function(request, response) {
 		response.error("Error: " + error.code + " " + error.message);
 	});
 });
+
+Parse.Cloud.define("getAllCurrentObs", function(request, response) {
+	Parse.Cloud.useMasterKey();
+	
+	var queryObs = new Parse.Query("GCUR_OBSERVATION");
+	queryObs.ascending("createdAt");
+	queryObs.equalTo("observationStatus", 0);
+	queryObs.limit(1000);
+	
+	queryObs.find().then(function(results) {
+		response.success(results.length);
+	}, function(error) {
+		response.error("Error: " + error.code + " " + error.message);
+	});
+});
