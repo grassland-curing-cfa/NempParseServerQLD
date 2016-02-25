@@ -55,7 +55,7 @@ Parse.Cloud.beforeSave("GCUR_OBSERVATION", function(request, response) {
 /**
  * Retrieve all Finalise Date based on the "createdAt" column of the GCUR_FINALISEMODEL class
  */
-Parse.Cloud.define("getAllFinalisedDate", function(request, response) {
+Parse.Cloud.define('getAllFinalisedDate', function(request, response) {
 	Parse.Cloud.useMasterKey();
 	
 	var finaliseModelList = [];
@@ -89,12 +89,12 @@ Parse.Cloud.define("getAllFinalisedDate", function(request, response) {
 	});
 });
 
-Parse.Cloud.define("getAllCurrentObs", function(request, response) {
-	Parse.Cloud.useMasterKey();
+Parse.Cloud.define('getAllCurrentObs', function(request, response) {
+	//Parse.Cloud.useMasterKey();
 	
 	var queryObs = new Parse.Query("GCUR_OBSERVATION");
 	queryObs.ascending("createdAt");
-	queryObs.equalTo("observationStatus", 0);
+	queryObs.equalTo("ObservationStatus", 0);
 	queryObs.limit(1000);
 	
 	queryObs.find().then(function(results) {
