@@ -14,23 +14,27 @@ Parse.Cloud.beforeSave("GCUR_OBSERVATION", function(request, response) {
 	if(!request.object.existed()) {
 		console.log("*** FLAG 2");
 		var sharedJurisSettingsQ = new Parse.Query("GCUR_SHARED_JURIS_SETTINGS");
-		
+		console.log("*** FLAG 21");
 		sharedJurisSettingsQ.find().then(function(sjsObjs) {
+			console.log("*** FLAG 22");
 			for (var i = 0; i < sjsObjs.length; i ++) {
 				var jurisdiction = sjsObjs[i].get("Jurisdiction");
 				console.log("*** jurisdiction:" + jurisdiction);
 				sharedWithJurisArr.push(jurisdiction);
 			}
-			
+			console.log("*** FLAG 23");
+
 			var sharedByArr = [];
-			
+			console.log("*** FLAG 24");
+
 			for (var i = 0; i < sharedWithJurisArr.length; i ++) {
 				sharedByArr.push({
 					"st" : sharedWithJurisArr[i],
 					"sh" : true
 				});
 			}
-			
+			console.log("*** FLAG 25");
+
 			request.object.set("SharedBy", JSON.stringify(sharedByArr));
 			console.log("*** FLAG 3");
 			response.success();
