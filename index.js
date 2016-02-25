@@ -37,5 +37,5 @@ app.get('/', function(req, res) {
 
 var port = process.env.PORT || 1337;
 app.listen(port, function() {
-    console.log(process.env.APP_NAME + ' running on port ' + port + '.');
+    console.log('parse-server-example running on port ' + port + '.');
 });
