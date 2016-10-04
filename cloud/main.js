@@ -313,10 +313,6 @@ Parse.Cloud.define("sendEmailFinalisedDataToUsers", function(request, response) 
 	}, function(error) {
 	    response.error("GCUR_MMR_USER_ROLE table lookup failed");
 	});
-	
-	/*
-	
-	*/
 });
 
 //export a list of email addresses for all active users
