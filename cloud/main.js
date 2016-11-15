@@ -552,10 +552,27 @@ Parse.Cloud.beforeSave("GCUR_LOCATION", function(request, response) {
  * Populate all ShareBy{STATE} columns available by "True" beforeSave a new Observation is added
  */
 Parse.Cloud.beforeSave("GCUR_OBSERVATION", function(request, response) {
-	Parse.Cloud.useMasterKey();
+	var objId = request.object.id;
+	var loc = request.object.get("Location");
+	
+	if (loc != undefined) {
+		var locObjId = loc.id;
+		console.log("*** beforeSave triggered on GCUR_OBSERVATION for GCUR_LOCATION: " + locObjId);
+	}
+	
+	if (request.user != undefined) {
+		console.log("*** beforeSave requested by _User: " + request.user.id);
+	}
+	
+	var newAreaCuring = newValidatorCuring = newAdminCuring = undefined;
+	newAreaCuring = request.object.get("AreaCuring");
+	newValidatorCuring = request.object.get("ValidatorCuring");
+	newAdminCuring = request.object.get("AdminCuring");
+				
+	console.log("* AreaCuring[ " + newAreaCuring + "], ValidatorCuring[" + newValidatorCuring + "], AdminCuring[" + newAdminCuring + "]");
 	sharedWithJurisArr = [];
 	
-	if(!request.object.existed()) {
+	if(request.object.isNew()) {
 		// Adding a new GCUR_OBSERVATION object
 		
 		var sharedJurisSettingsQ = new Parse.Query("GCUR_SHARED_JURIS_SETTINGS");
@@ -581,26 +598,13 @@ Parse.Cloud.beforeSave("GCUR_OBSERVATION", function(request, response) {
 		});
 	} else {
 		// Updating an existing GCUR_OBSERVATION object
-		
-		var objId = request.object.id;
-		console.log("This Observation exists already - objectId = " + objId);
-		
-		var newAreaCuring = newValidatorCuring = newAdminCuring = undefined;
-		newAreaCuring = request.object.get("AreaCuring");
-		newValidatorCuring = request.object.get("ValidatorCuring");
-		newAdminCuring = request.object.get("AdminCuring");
-					
-		console.log("* NEW AreaCuring = " + request.object.get("AreaCuring"));
-		console.log("* NEW ValidatorCuring = " + request.object.get("ValidatorCuring"));
-		console.log("* NEW AdminCuring = " + request.object.get("AdminCuring"));
+		console.log("*** Updating an existing Observation. GCUR_OBSERVATION objectId = " + objId);
 		
 		if ( (newAreaCuring == undefined) && (newValidatorCuring == undefined) && (newAdminCuring == undefined) ) {
 			var queryObservation = new Parse.Query("GCUR_OBSERVATION");
 			queryObservation.equalTo("objectId", objId);
 			queryObservation.first({
 				success: function(object) {
-					// Successfully retrieved the existing object
-					console.log("* Object has been retrieved. ");
 					// Delete this object
 					object.destroy({
 						success: function(myObject) {
@@ -614,19 +618,65 @@ Parse.Cloud.beforeSave("GCUR_OBSERVATION", function(request, response) {
 							response.error("Error: " + error.code + " " + error.message);
 						}
 					});
-					
-					
 				},
 				error: function(error) {
-					console.log("* Object has NOT been retrieved. ");
+					console.log("### Observation Object has NOT been retrieved.");
 					response.error("Error: " + error.code + " " + error.message);
 				}
 			});
 		} else {
 			response.success();
 		}
+	}
+});
+
+/*
+ * after a new Observation is added
+ */
+Parse.Cloud.afterSave("GCUR_OBSERVATION", function(request, response) {
+	var objId = request.object.id;
+	var loc = request.object.get("Location");
+	var locObjId = loc.id;
+	console.log("*** afterSave triggered on GCUR_OBSERVATION [" + objId + "] for GCUR_LOCATION [" + locObjId + "]");
+	
+	if (request.user != undefined) {
+		var queryUser = new Parse.Query(Parse.User);
+		queryUser.equalTo("objectId", request.user.id);
 		
+		// Use the new "useMasterKey" option in the Parse Server Cloud Code to bypass ACLs or CLPs.
+		queryUser.first({ useMasterKey: true }).then(function (user) {
+			var userName = user.get("username");
+			console.log("*** afterSave GCUR_OBSERVATION requested by _User [" + userName + "] [" + request.user.id + "]");
+		}, function(error) {
+			console.log("*** afterSave GCUR_OBSERVATION requested by _User [" + request.user.id + "]");
+			console.error("Parse.User table lookup failed. Error: " + error.code + " " + error.message);
+		});
+	} else {
+		console.log("*** afterSave GCUR_OBSERVATION. Requesting user is undefined.");
+	}
+});
+
+/*
+ * after a new Location is added
+ */
+Parse.Cloud.afterSave("GCUR_LOCATION", function(request, response) {
+	var objId = request.object.id;
+	var locName = request.object.get("LocationName");
+
+	if (request.user != undefined) {
+		var queryUser = new Parse.Query(Parse.User);
+		queryUser.equalTo("objectId", request.user.id);
 		
+		// Use the new "useMasterKey" option in the Parse Server Cloud Code to bypass ACLs or CLPs.
+		queryUser.first({ useMasterKey: true }).then(function (user) {
+			var userName = user.get("username");
+			console.log("*** afterSave GCUR_LOCATION [" + locName + "] [" + objId + "] requested by _User [" + userName + "] [" + request.user.id + "]");
+		}, function(error) {
+			console.log("*** afterSave GCUR_LOCATION [" + locName + "] [" + objId + "] requested by _User [" + request.user.id + "]");
+			console.error("Parse.User table lookup failed. Error: " + error.code + " " + error.message);
+		});
+	} else {
+		console.log("*** afterSave GCUR_LOCATION [" + locName + "] [" + objId + "]. Requesting user is undefined.");
 	}
 });
 
@@ -2693,6 +2743,14 @@ Parse.Cloud.define("updateLinkedLocsForObserverByIds", function(request, respons
 Parse.Cloud.define("acceptAllObserverCurings", function(request, response) {
 	var validatorObjId = request.params.validatorObjId;	// String
 	
+	console.log("*** acceptAllObserverCurings function called by Validator [" + validatorObjId + "]");
+	
+	var sessionToken = undefined;
+	if (request.user != undefined) {
+		sessionToken = request.user.getSessionToken();
+		console.log("* request.user.id = " + request.user.id);
+	}
+	
 	Parse.User.logIn(SUPERUSER, SUPERPASSWORD).then(function(user) {
 		var queryObservation = new Parse.Query("GCUR_OBSERVATION");
 		queryObservation.equalTo("ObservationStatus", 0);	// All current observation records
@@ -2719,6 +2777,7 @@ Parse.Cloud.define("acceptAllObserverCurings", function(request, response) {
 		}
 		
 		Parse.Object.saveAll(results, {
+			sessionToken: sessionToken,
 		    success: function(list) {
 		        // All the objects were saved.
 		    	response.success(affectedObsCount);  //saveAll is now finished and we can properly exit with confidence :-)
