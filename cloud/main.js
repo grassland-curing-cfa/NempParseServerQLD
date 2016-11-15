@@ -570,6 +570,7 @@ Parse.Cloud.beforeSave("GCUR_OBSERVATION", function(request, response) {
 	newAdminCuring = request.object.get("AdminCuring");
 				
 	console.log("* AreaCuring[ " + newAreaCuring + "], ValidatorCuring[" + newValidatorCuring + "], AdminCuring[" + newAdminCuring + "]");
+	
 	sharedWithJurisArr = [];
 	
 	if(request.object.isNew()) {
