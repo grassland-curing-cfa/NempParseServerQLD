@@ -5,6 +5,7 @@
  * Initial checkin date: 		21/07/2016
  * Following-up check date:		29/09/2016: copied "main.js" from Parse hosted service
  * 								04/10/2016: modified "main.js" for preparation for migrating ParseServer to Heroku
+ * 								16/11/2016: NEMP-1-150: added request.user to beforeSave and afterSave triggers for GCUR_OBSERVATION & GCUR_LOCATION classes
  * 
  * https://nemp-qld-dev.herokuapp.com/parse/
  */
