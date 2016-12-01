@@ -594,6 +594,8 @@ Parse.Cloud.beforeSave("GCUR_OBSERVATION", function(request, response) {
 				});
 			}
 			
+			console.log("JSON.stringify(sharedByArr):" + JSON.stringify(sharedByArr));
+
 			request.object.set("SharedBy", JSON.stringify(sharedByArr));
 			
 			response.success();
