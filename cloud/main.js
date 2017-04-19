@@ -289,6 +289,7 @@ Parse.Cloud.define("sendEmailFinalisedDataToUsers", function(request, response) 
 			'<body>' + 
 			'Hello all,' + 
 			'<p>The Queensland grassland curing and fuel load maps have been updated for the ' + strToday + '. To view the grassland curing map, please click <a href="' + GAE_APP_URL + '/viscaModel?action=grasslandCuringMap">here</a>. To view the fuel load maps, please click <a href="' + GAE_APP_URL + '/viscaModel?action=fuelLoadMaps">here</a>.</p>' + 
+			'<p>Please note you can always enter your observations through the online data entry tool <a href="' + GAE_APP_URL + '">' + GAE_APP_URL + '</a>. If you cannot remember your log details, please let us know and we will send them to you.</p>' +
 			'<p>Kind Regards,</p>' + 
 			'<p>The NEMP Grassland Curing Team <a href="' + CFA_NEMP_EMAIL + '">' + CFA_NEMP_EMAIL + '</a></p>' + 
 			'<p><i>Note: This email has been generated automatically by ' + process.env.APP_NAME + '. Please do not reply to this email.</i></p>' + 
