@@ -1987,8 +1987,6 @@ Parse.Cloud.define("getCurrPrevSimpleObservationsForLocation", function(request,
 		};
 				
 		if (results.length > 0) {
-			console.log("*** results.length = " + results.length);
-
 			var currObservationObjectId, currObservationDate, currObserverObjectId, currObserverName;
 			var currPointCuring, currPointHeight, currPointCover, currPointFuelLoad, currAreaCuring, currAreaHeight, currAreaCover, currAreaFuelLoad, currRainfall, currRodObjectId, currComment, currUserFuelLoad, currFuelLoadCategory;
 			var currValidationDate, currValidatorObjectId, currValidatorName, currValidatorCuring, currValidatorFuelLoadCategory;
@@ -1998,16 +1996,11 @@ Parse.Cloud.define("getCurrPrevSimpleObservationsForLocation", function(request,
 			
 			// Only previous observation exists for the Location
 			if ((results.length == 1) && (results[0].get("ObservationStatus") == 1)) {
-				console.log("*** results.length == 1 AND ObservationStatus == 1");
 				// results[0] is GCUR_OBSERVATION for previous observation
 				
 				// check if FinalisedDate is 30 days away
 				var isPrevObsTooOld = isObsTooOld(results[0].get("FinalisedDate"));
-				console.log("*** FinalisedDate == " + results[0].get("FinalisedDate"));
-				request.log.warn("*** warn FinalisedDate == " + results[0].get("FinalisedDate"));
-				request.log.info("*** info FinalisedDate == " + results[0].get("FinalisedDate"));
 				if (!isPrevObsTooOld) {
-					console.log("*** isPrevObsTooOld is False");
 					prevObservationObjectId = results[0].id;
 					if (results[0].has("PointCuring"))
 						prevPointCuring = results[0].get("PointCuring");
@@ -2038,19 +2031,14 @@ Parse.Cloud.define("getCurrPrevSimpleObservationsForLocation", function(request,
 					
 					if (results[0].has("AdminCuring")) {
 						prevOpsCuring = results[0].get("AdminCuring");
-						console.log("prevOpsCuring = prev AdminCuring = " + prevOpsCuring);
 					} else if (results[0].has("ValidatorCuring")) {
 						prevOpsCuring = results[0].get("ValidatorCuring");
-						console.log("prevOpsCuring = prev ValidatorCuring = " + prevOpsCuring);
 					}
 					/*
 					else {
 						prevOpsCuring = results[0].get("AreaCuring");
 					}
 					*/
-				}
-				else {
-					console.log("*** isPrevObsTooOld is True");
 				}
 			} else {			
 				// current observation exists
