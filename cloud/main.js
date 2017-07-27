@@ -2004,7 +2004,7 @@ Parse.Cloud.define("getCurrPrevSimpleObservationsForLocation", function(request,
 				// check if FinalisedDate is 30 days away
 				var isPrevObsTooOld = isObsTooOld(results[0].get("FinalisedDate"));
 				console.log("*** FinalisedDate == " + results[0].get("FinalisedDate"));
-				request.log.warn("*** warn FinalisedDate == " + results[0].get("FinalisedDate"));
+				request.log.warn("*** FinalisedDate == " + results[0].get("FinalisedDate"));
 				if (!isPrevObsTooOld) {
 					console.log("*** isPrevObsTooOld is False");
 					prevObservationObjectId = results[0].id;
@@ -3513,7 +3513,6 @@ function numDaysBetween(d1, d2) {
 function isObsTooOld(finalisedDate) {
 	var today = new Date();
 	var numberOfDaysBetween = numDaysBetween(today, finalisedDate);
-	request.log.warn("*** numberOfDaysBetween == " + numberOfDaysBetween);
 	
 	if (numberOfDaysBetween > MAX_DAYS_ALLOWED_FOR_PREVIOUS_OBS)
 		return true;
