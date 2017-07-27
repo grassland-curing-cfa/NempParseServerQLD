@@ -2003,8 +2003,10 @@ Parse.Cloud.define("getCurrPrevSimpleObservationsForLocation", function(request,
 				
 				// check if FinalisedDate is 30 days away
 				var isPrevObsTooOld = isObsTooOld(results[0].get("FinalisedDate"));
+				console.log("*** FinalisedDate == " + results[0].get("FinalisedDate"));
+				request.log.warn("*** FinalisedDate == " + results[0].get("FinalisedDate"));
 				if (!isPrevObsTooOld) {
-					console.log("isPrevObsTooOld is False");
+					console.log("*** isPrevObsTooOld is False");
 					prevObservationObjectId = results[0].id;
 					if (results[0].has("PointCuring"))
 						prevPointCuring = results[0].get("PointCuring");
@@ -2047,7 +2049,7 @@ Parse.Cloud.define("getCurrPrevSimpleObservationsForLocation", function(request,
 					*/
 				}
 				else {
-					console.log("isPrevObsTooOld is True");
+					console.log("*** isPrevObsTooOld is True");
 				}
 			} else {			
 				// current observation exists
