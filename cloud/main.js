@@ -2046,6 +2046,9 @@ Parse.Cloud.define("getCurrPrevSimpleObservationsForLocation", function(request,
 					}
 					*/
 				}
+				else {
+					console.log("isPrevObsTooOld is True");
+				}
 			} else {			
 				// current observation exists
 				
