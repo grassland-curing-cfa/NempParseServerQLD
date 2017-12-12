@@ -26,6 +26,7 @@ var MG_DOMAIN = process.env.MG_DOMAIN;
 var MG_KEY = process.env.MG_KEY;
 var CFA_NEMP_EMAIL = process.env.EMAIL_ADDR_CFA_NEMP;
 var CFA_GL_EMAIL = process.env.EMAIL_ADDR_CFA_GL;
+var EMAIL_LIST_WANT_TO_BECOME_OBSERVER = process.env.EMAIL_LIST_WANT_TO_BECOME_OBSERVER;
 var _IS_DAYLIGHT_SAVING = (process.env.IS_DAYLIGHT_SAVING == "1" ? true : false);				// boolean indicates if it is now in Daylight Saving time
 var _IS_FIRE_DANGER_PERIOD = (process.env.IS_FIRE_DANGER_PERIOD == "1" ? true : false);			// boolean indicates if it is now in the Fire Danger Period
 var GAE_APP_URL = process.env.GAE_APP_URL;			// The URL to the GAE app (appspot)
@@ -173,7 +174,7 @@ Parse.Cloud.define("sendEmailWantToBecomeObserver", function(request, response) 
 	
 	var html = '<!DOCTYPE html><html>' +
 		'<body>' + 
-		'Hello Grassland Curing NEMP team,' + 
+		'Hello,' + 
 		'<p>' + '<strong>' + firstname + ' ' +  lastname + '</strong> (<a href="mailto:' + email + '">' + email + '</a>) has signed up to become an observer. The following contact information has also been provided:</p>' + 
 		'<ul>' + 
 		'<li>Address:   ' + address + '</li>' + 
@@ -188,8 +189,9 @@ Parse.Cloud.define("sendEmailWantToBecomeObserver", function(request, response) 
 		'</html>';
 
 	mailgun.messages().send({
-		to: CFA_NEMP_EMAIL,
+		to: EMAIL_LIST_WANT_TO_BECOME_OBSERVER,
 		from: CFA_NEMP_EMAIL,
+		cc: CFA_NEMP_EMAIL,
 		subject: "Express of Interest to become a grassland curing observer",
 		text: '',
 		html: html
