@@ -2891,6 +2891,7 @@ Parse.Cloud.define("getAllFinalisedDate", function(request, response) {
  * Get the downloadable observation report based on user-specified finalised model objectId
  */
 Parse.Cloud.define("getDataReport", function(request, response) {
+	console.log("finalisedModelObjectId: " + finalisedModelObjectId);
 	var finalisedModelObjectId = request.params.finalisedModelObjectId;
 	
 	// Query the GCUR_DISTRICT document and retrieve all district id and name sets
