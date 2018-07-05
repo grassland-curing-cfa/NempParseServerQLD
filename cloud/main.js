@@ -2916,8 +2916,6 @@ Parse.Cloud.define("getDataReport", function(request, response) {
 			
 			allDistrictDict[dist.get("DISTRICT").toString()] = dist.get("DIST_NAME");	// {1: "Brisbane", 2: "South Western", ... ...}
 		}
-		console.log("FLAG 1");
-		console.log(allDistrictDict);
 		return Parse.Promise.as("All " + Object.keys(allDistrictDict).length + " districts were retrieved.");
 	}).then(function() {
 		var queryLocation = new Parse.Query("GCUR_LOCATION");
@@ -2925,7 +2923,7 @@ Parse.Cloud.define("getDataReport", function(request, response) {
 		queryLocation.ascending("DistrictNo");
 		return queryLocation.find();
 	}).then(function(locations) {
-		for (var i = o; i < locations.length; i++) {
+		for (var i = 0; i < locations.length; i++) {
 			var location = locations[i];
 			var locationObjectId = location.id;
 			var locationName = location.get("LocationName");
