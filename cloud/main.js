@@ -2978,6 +2978,7 @@ Parse.Cloud.define("getDataReport", function(request, response) {
 			var lng = undefined;
 			var lat = undefined;
 			var districtNo = undefined;
+			var districtName = undefined;
 			
 			var areaCuring = undefined;
 			var areaHeight = undefined;
@@ -2997,6 +2998,7 @@ Parse.Cloud.define("getDataReport", function(request, response) {
 			lng = location.get("Lng");
 			lat = location.get("Lat");
 			districtNo = location.get("DistrictNo");	// district Id
+			districtName = allDistrictDict[districtNo];
 			
 			if (observations[i].has("AreaCuring"))
 				areaCuring = observations[i].get("AreaCuring");
@@ -3028,7 +3030,7 @@ Parse.Cloud.define("getDataReport", function(request, response) {
 					"locationName": locationName,
 					"lng": lng,
 					"lat": lat,
-					"districtNo": districtNo,
+					"districtName": districtName,
 					"areaCuring": areaCuring,
 					"areaHeight": areaHeight,
 					"areaCover": areaCover,
