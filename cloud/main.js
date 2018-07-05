@@ -2893,12 +2893,65 @@ Parse.Cloud.define("getAllFinalisedDate", function(request, response) {
 Parse.Cloud.define("getDataReport", function(request, response) {
 	var finalisedModelObjectId = request.params.finalisedModelObjectId;
 	
+	// Query the GCUR_DISTRICT document and retrieve all district id and name sets
+	var allDistrictDict = {};
+	
+	// Query the GCUR_LOCATION document
+	var allLocations = [];	
+	
 	var returnedObsList = [];
 	
-	var queryFinaliseModel = new Parse.Query("GCUR_FINALISEMODEL");
-	queryFinaliseModel.equalTo("objectId", finalisedModelObjectId);
-	queryFinaliseModel.limit(1000);
-	queryFinaliseModel.first().then(function(finalisedModel) {
+	var queryDistrict = new Parse.Query("GCUR_DISTRICT");
+	queryDistrict.ascending("DISTRICT");
+	queryDistrict.find().then(function(districts) {
+		for (var i = 0; i < districts.length; i++) {
+			var dist = districts[i];
+			//var distObj = {
+			//	"districtId": dist.get("DISTRICT"),
+			//	"districtName": dist.get("DIST_NAME")
+			//};
+			
+			//allDistricts.push(distObj);
+			
+			allDistrictDict[dist.get("DISTRICT").toString()] = dist.get("DIST_NAME");	// {1: "Brisbane", 2: "South Western", ... ...}
+		}
+		
+		return Parse.Promise.as("All " + allDistricts.length + " districts were retrieved.");
+	}).then(function() {
+		var queryLocation = new Parse.Query("GCUR_LOCATION");
+		//queryLocation.equalTo("LocationStatus", "mandatory");
+		queryLocation.ascending("DistrictNo");
+		return queryLocation.find();
+	}).then(function(locations) {
+		for (var i = o; i < locations.length; i++) {
+			var location = locations[i];
+			var locationObjectId = location.id;
+			var locationName = location.get("LocationName");
+			var lng = location.get("Lng");
+			var lat = location.get("Lat");
+			var locationStatus = location.get("LocationStatus");
+			var districtNo = location.get("DistrictNo");	// district Id
+			var districtName = allDistrictDict[districtNo];
+			
+			var locObj = {
+				"locationObjectId": locationObjectId,
+				"locationName": locationName,
+				"lng": lng,
+				"lat": lat,
+				"locationStatus": locationStatus,
+				"districtName": districtName
+			};
+			
+			allLocations.push(locObj);
+		}
+		
+		return Parse.Promise.as("All " + allLocations.length + " locations were retrieved.");
+	}).then(function() {
+		var queryFinaliseModel = new Parse.Query("GCUR_FINALISEMODEL");
+		queryFinaliseModel.equalTo("objectId", finalisedModelObjectId);
+		queryFinaliseModel.limit(1000);
+		return queryFinaliseModel.first();
+	}).then(function(finalisedModel) {
 		var createdAt = finalisedModel.createdAt;
 		
 		var year = createdAt.getFullYear();
@@ -2924,6 +2977,8 @@ Parse.Cloud.define("getDataReport", function(request, response) {
 			var locationName = undefined;
 			var lng = undefined;
 			var lat = undefined;
+			var districtNo = undefined;
+			
 			var areaCuring = undefined;
 			var areaHeight = undefined;
 			var areaCover = undefined;
@@ -2941,6 +2996,7 @@ Parse.Cloud.define("getDataReport", function(request, response) {
 			locationName = location.get("LocationName");
 			lng = location.get("Lng");
 			lat = location.get("Lat");
+			districtNo = location.get("DistrictNo");	// district Id
 			
 			if (observations[i].has("AreaCuring"))
 				areaCuring = observations[i].get("AreaCuring");
@@ -2972,6 +3028,7 @@ Parse.Cloud.define("getDataReport", function(request, response) {
 					"locationName": locationName,
 					"lng": lng,
 					"lat": lat,
+					"districtNo": districtNo,
 					"areaCuring": areaCuring,
 					"areaHeight": areaHeight,
 					"areaCover": areaCover,
