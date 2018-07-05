@@ -37,6 +37,7 @@ var MAX_DAYS_ALLOWED_FOR_PREVIOUS_OBS = process.env.MAX_DAYS_ALLOWED_FOR_PREVIOU
 // Use Parse.Cloud.define to define as many cloud functions as you want.
 // For example:
 Parse.Cloud.define("hello", function(request, response) {
+	console.log("hello");
 	response.success("Hello world from " + process.env.APP_NAME);
 });
 
