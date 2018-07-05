@@ -37,7 +37,6 @@ var MAX_DAYS_ALLOWED_FOR_PREVIOUS_OBS = process.env.MAX_DAYS_ALLOWED_FOR_PREVIOU
 // Use Parse.Cloud.define to define as many cloud functions as you want.
 // For example:
 Parse.Cloud.define("hello", function(request, response) {
-	console.log("hello");
 	response.success("Hello world from " + process.env.APP_NAME);
 });
 
@@ -2892,7 +2891,7 @@ Parse.Cloud.define("getAllFinalisedDate", function(request, response) {
  * Get the downloadable observation report based on user-specified finalised model objectId
  */
 Parse.Cloud.define("getDataReport", function(request, response) {
-	console.log("finalisedModelObjectId: " + finalisedModelObjectId);
+	console.log("finalisedModelObjectId: " + request.params.finalisedModelObjectId);
 	var finalisedModelObjectId = request.params.finalisedModelObjectId;
 	
 	// Query the GCUR_DISTRICT document and retrieve all district id and name sets
@@ -2918,6 +2917,7 @@ Parse.Cloud.define("getDataReport", function(request, response) {
 			allDistrictDict[dist.get("DISTRICT").toString()] = dist.get("DIST_NAME");	// {1: "Brisbane", 2: "South Western", ... ...}
 		}
 		console.log("FLAG 1");
+		console.log(allDistrictDict);
 		return Parse.Promise.as("All " + Object.keys(allDistrictDict).length + " districts were retrieved.");
 	}).then(function() {
 		var queryLocation = new Parse.Query("GCUR_LOCATION");
