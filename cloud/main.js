@@ -7,6 +7,7 @@
 								16/11/2016:	NEMP-1-150: added request.user to beforeSave and afterSave triggers for GCUR_OBSERVATION & GCUR_LOCATION classes
 								01/12/2016:	NEMP-1-154: Running the "applyValidationByException" Cloud function creates incorrect String on the "SharedBy" column of the GCUR_OBSERVATION table
 											NEMP-1-151: Remove unnecessary Parse.User.logIn(SUPERUSER, SUPERPASSWORD) and Parse.Cloud.useMasterKey() in the Cloud function
+
  * 
  */
 
@@ -2891,7 +2892,7 @@ Parse.Cloud.define("getAllFinalisedDate", function(request, response) {
  * Get the downloadable observation report based on user-specified finalised model objectId
  */
 Parse.Cloud.define("getDataReport", function(request, response) {
-	console.log("finalisedModelObjectId: " + request.params.finalisedModelObjectId);
+	request.log.info('request.params.finalisedModelObjectId = ' + request.params.finalisedModelObjectId);
 	var finalisedModelObjectId = request.params.finalisedModelObjectId;
 	
 	// Query the GCUR_DISTRICT document and retrieve all district id and name sets
