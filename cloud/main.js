@@ -2916,7 +2916,7 @@ Parse.Cloud.define("getDataReport", function(request, response) {
 			allDistrictDict[dist.get("DISTRICT").toString()] = dist.get("DIST_NAME");	// {1: "Brisbane", 2: "South Western", ... ...}
 		}
 		
-		return Parse.Promise.as("All " + allDistricts.length + " districts were retrieved.");
+		return Parse.Promise.as("All " + Object.keys(allDistrictDict).length + " districts were retrieved.");
 	}).then(function() {
 		var queryLocation = new Parse.Query("GCUR_LOCATION");
 		//queryLocation.equalTo("LocationStatus", "mandatory");
