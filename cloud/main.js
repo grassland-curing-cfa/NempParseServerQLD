@@ -2924,7 +2924,7 @@ Parse.Cloud.define("getDataReport", function(request, response) {
 		return Parse.Promise.as("All " + Object.keys(allDistrictDict).length + " districts were retrieved.");
 	}).then(function() {
 		var queryLocation = new Parse.Query("GCUR_LOCATION");
-		//queryLocation.equalTo("LocationStatus", "mandatory");
+		queryLocation.equalTo("LocationStatus", "mandatory");
 		queryLocation.ascending("DistrictNo");
 		queryLocation.limit(1000); 		// limit to at most 1000 results
 		return queryLocation.find();
