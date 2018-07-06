@@ -2926,6 +2926,7 @@ Parse.Cloud.define("getDataReport", function(request, response) {
 		var queryLocation = new Parse.Query("GCUR_LOCATION");
 		//queryLocation.equalTo("LocationStatus", "mandatory");
 		queryLocation.ascending("DistrictNo");
+		queryLocation.limit(1000); 		// limit to at most 1000 results
 		return queryLocation.find();
 	}).then(function(locations) {
 		for (var i = 0; i < locations.length; i++) {
@@ -3057,7 +3058,7 @@ Parse.Cloud.define("getDataReport", function(request, response) {
 		
 		// Get a list of locations that had not received observations or validations
 		var resultaa = allLocations.filter(loc => !(locObjIdsWithObsOrVal.includes(loc[locationObjectId])));
-		request.log.info("Count of locations not observed or validated" + resultaa.length);
+		request.log.info("Count of locations not observed or validated " + resultaa.length);
 		request.log.info(resultaa);
 
 		
