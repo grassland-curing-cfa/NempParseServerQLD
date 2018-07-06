@@ -7,10 +7,13 @@
 								16/11/2016:	NEMP-1-150: added request.user to beforeSave and afterSave triggers for GCUR_OBSERVATION & GCUR_LOCATION classes
 								01/12/2016:	NEMP-1-154: Running the "applyValidationByException" Cloud function creates incorrect String on the "SharedBy" column of the GCUR_OBSERVATION table
 											NEMP-1-151: Remove unnecessary Parse.User.logIn(SUPERUSER, SUPERPASSWORD) and Parse.Cloud.useMasterKey() in the Cloud function
+								06/07/2018: As per requested by Barry Heilbronn of QLD QFES, two changes were made to the report function:
+											  1. additional fields "LocationStatus" & "DistrctName"  added to the observation report; also
+											  2. list all mandatory locations including those with no observation or validation.
+											  GAE VERSION AT 3-11
 
  * 
  */
-
 var _ = require('underscore');
 var turf = require('turf');							// https://www.npmjs.com/package/turf
 
@@ -2892,7 +2895,6 @@ Parse.Cloud.define("getAllFinalisedDate", function(request, response) {
  * Get the downloadable observation report based on user-specified finalised model objectId
  */
 Parse.Cloud.define("getDataReport", function(request, response) {
-	request.log.info('request.params.finalisedModelObjectId = ' + request.params.finalisedModelObjectId);
 	var finalisedModelObjectId = request.params.finalisedModelObjectId;
 	
 	// Query the GCUR_DISTRICT document and retrieve all district id and name sets
@@ -2910,12 +2912,6 @@ Parse.Cloud.define("getDataReport", function(request, response) {
 	queryDistrict.find().then(function(districts) {
 		for (var i = 0; i < districts.length; i++) {
 			var dist = districts[i];
-			//var distObj = {
-			//	"districtId": dist.get("DISTRICT"),
-			//	"districtName": dist.get("DIST_NAME")
-			//};
-			
-			//allDistricts.push(distObj);
 			
 			allDistrictDict[dist.get("DISTRICT").toString()] = dist.get("DIST_NAME");	// {1: "Brisbane", 2: "South Western", ... ...}
 		}
@@ -3033,7 +3029,7 @@ Parse.Cloud.define("getDataReport", function(request, response) {
 			if (observations[i].has("Comments"))
 				comments = observations[i].get("Comments");
 			
-			// 15 key-value pairs
+			// 17 key-value pairs
 			var returnedObs = {
 					"observationObjectId": observationObjectId,
 					"locationObjectId": locationObjectId,
@@ -3056,8 +3052,9 @@ Parse.Cloud.define("getDataReport", function(request, response) {
 			returnedObsList.push(returnedObs);
 		}
 		
-		// Get a list of locations that had not received observations or validations
-		console.log("Count of locations observed or validated " + locObjIdsWithObsOrVal.length);
+		// Get a list of locations that had not received observations or validations;
+		// those locations are to be added to the exported data report with NIL observation
+		request.log.info("Count of locations observed or validated " + locObjIdsWithObsOrVal.length);
 		var locationsNotObsOrVal = allLocations.filter(loc => !(locObjIdsWithObsOrVal.includes(loc["locationObjectId"])));
 		request.log.info("Count of locations not observed or validated " + locationsNotObsOrVal.length);
 		
