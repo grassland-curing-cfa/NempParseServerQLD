@@ -2899,7 +2899,9 @@ Parse.Cloud.define("getDataReport", function(request, response) {
 	var allDistrictDict = {};
 	
 	// Query the GCUR_LOCATION document
-	var allLocations = [];	
+	var allLocations = [];
+	
+	var locObjIdsWithObsOrVal = [];
 	
 	var returnedObsList = [];
 	
@@ -2917,6 +2919,8 @@ Parse.Cloud.define("getDataReport", function(request, response) {
 			
 			allDistrictDict[dist.get("DISTRICT").toString()] = dist.get("DIST_NAME");	// {1: "Brisbane", 2: "South Western", ... ...}
 		}
+		
+		request.log.info("All " + Object.keys(allDistrictDict).length + " districts were retrieved.");
 		return Parse.Promise.as("All " + Object.keys(allDistrictDict).length + " districts were retrieved.");
 	}).then(function() {
 		var queryLocation = new Parse.Query("GCUR_LOCATION");
@@ -2932,7 +2936,7 @@ Parse.Cloud.define("getDataReport", function(request, response) {
 			var lat = location.get("Lat");
 			var locationStatus = location.get("LocationStatus");
 			var districtNo = location.get("DistrictNo");	// district Id
-			var districtName = allDistrictDict[districtNo];
+			var districtName = allDistrictDict[districtNo];	// get district name from the dictionary
 			
 			var locObj = {
 				"locationObjectId": locationObjectId,
@@ -2946,6 +2950,7 @@ Parse.Cloud.define("getDataReport", function(request, response) {
 			allLocations.push(locObj);
 		}
 		
+		request.log.info("All " + allLocations.length + " locations were retrieved.");
 		return Parse.Promise.as("All " + allLocations.length + " locations were retrieved.");
 	}).then(function() {
 		var queryFinaliseModel = new Parse.Query("GCUR_FINALISEMODEL");
@@ -2971,16 +2976,16 @@ Parse.Cloud.define("getDataReport", function(request, response) {
 		queryObservation.limit(1000);
 		return queryObservation.find();
 	}).then(function(observations) {
-		for (var i = 0; i < observations.length; i ++) {
+		for (var i = 0; i < observations.length; i ++) {			
 			var observationObjectId = undefined;
 			var locationObjectId = undefined;
 			var location = undefined;
 			var locationName = undefined;
+			var locationStatus = undefined;
 			var lng = undefined;
 			var lat = undefined;
 			var districtNo = undefined;
 			var districtName = undefined;
-			
 			var areaCuring = undefined;
 			var areaHeight = undefined;
 			var areaCover = undefined;
@@ -2996,10 +3001,13 @@ Parse.Cloud.define("getDataReport", function(request, response) {
 			location = observations[i].get("Location");
 			locationObjectId = location.id;
 			locationName = location.get("LocationName");
+			locationStatus = location.get("LocationStatus");
 			lng = location.get("Lng");
 			lat = location.get("Lat");
-			districtNo = location.get("DistrictNo");	// district Id
-			districtName = allDistrictDict[districtNo];
+			districtNo = location.get("DistrictNo");		// district Id
+			districtName = allDistrictDict[districtNo];		// retrieve the district name from the dictionary
+			
+			locObjIdsWithObsOrVal.push(locationObjectId);	// Add objectId to the locObjIdsWithObsOrVal list for later processing
 			
 			if (observations[i].has("AreaCuring"))
 				areaCuring = observations[i].get("AreaCuring");
@@ -3029,6 +3037,7 @@ Parse.Cloud.define("getDataReport", function(request, response) {
 					"observationObjectId": observationObjectId,
 					"locationObjectId": locationObjectId,
 					"locationName": locationName,
+					"locationStatus": locationStatus,
 					"lng": lng,
 					"lat": lat,
 					"districtName": districtName,
@@ -3045,6 +3054,12 @@ Parse.Cloud.define("getDataReport", function(request, response) {
 			};
 			returnedObsList.push(returnedObs);
 		}
+		
+		// Get a list of locations that had not received observations or validations
+		var resultaa = allLocations.filter(loc => !(locObjIdsWithObsOrVal.includes(loc[locationObjectId])));
+		request.log.info("Count of locations not observed or validated" + resultaa.length);
+		request.log.info(resultaa);
+
 		
 	    response.success(returnedObsList);
 	}, function(error) {
