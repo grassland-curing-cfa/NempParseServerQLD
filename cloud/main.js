@@ -3057,6 +3057,7 @@ Parse.Cloud.define("getDataReport", function(request, response) {
 		}
 		
 		// Get a list of locations that had not received observations or validations
+		request.log.info("Count of locations observed or validated " + returnedObsList.length);
 		var resultaa = allLocations.filter(loc => !(locObjIdsWithObsOrVal.includes(loc[locationObjectId])));
 		request.log.info("Count of locations not observed or validated " + resultaa.length);
 		request.log.info(resultaa);
