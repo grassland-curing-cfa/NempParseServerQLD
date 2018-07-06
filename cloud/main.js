@@ -3057,12 +3057,36 @@ Parse.Cloud.define("getDataReport", function(request, response) {
 		}
 		
 		// Get a list of locations that had not received observations or validations
-		request.log.info("Count of locations observed or validated " + locObjIdsWithObsOrVal.length);
-		var resultaa = allLocations.filter(loc => !(locObjIdsWithObsOrVal.includes(loc["locationObjectId"])));
-		request.log.info("Count of locations not observed or validated " + resultaa.length);
-		request.log.info(resultaa);
-
+		console.log("Count of locations observed or validated " + locObjIdsWithObsOrVal.length);
+		var locationsNotObsOrVal = allLocations.filter(loc => !(locObjIdsWithObsOrVal.includes(loc["locationObjectId"])));
+		request.log.info("Count of locations not observed or validated " + locationsNotObsOrVal.length);
 		
+		for(var k = 0; k < locationsNotObsOrVal.length; k ++) {
+			var locNotObsOrVal = locationsNotObsOrVal[k];
+			var returnedObs = {
+					"observationObjectId": undefined,
+					"locationObjectId": locNotObsOrVal["locationObjectId"],
+					"locationName": locNotObsOrVal["locationName"],
+					"locationStatus": locNotObsOrVal["locationStatus"],
+					"lng": locNotObsOrVal["lng"],
+					"lat": locNotObsOrVal["lat"],
+					"districtName": locNotObsOrVal["districtName"],
+					"areaCuring": undefined,
+					"areaHeight": undefined,
+					"areaCover": undefined,
+					"areaFuelLoad": undefined,
+					"userFuelLoad": undefined,
+					"validatorCuring": undefined,
+					"adminCuring": undefined,					
+					"rainfall": undefined,
+					"rateOfDrying": undefined,
+					"comments": undefined
+			};
+			
+			returnedObsList.push(returnedObs);
+		}
+		
+		request.log.info("Count of returned observation records is " + returnedObsList.length);
 	    response.success(returnedObsList);
 	}, function(error) {
 		response.error("Error: " + error.code + " " + error.message);
