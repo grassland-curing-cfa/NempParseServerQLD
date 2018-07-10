@@ -3427,7 +3427,8 @@ Parse.Cloud.define("automateRunModel", function(request, response) {
 		
 			// If no RunModel job has been added
 			case 0:
-				console.log("No RunModel was added.");
+				executionMsg += "No RunModel was added."
+				console.log(executionMsg);
 				
 				ToCreate = true;
 				ResToCreate = RESOLUTIONS[0];
@@ -3435,19 +3436,22 @@ Parse.Cloud.define("automateRunModel", function(request, response) {
 			// If there is 1 RunModel job that has been added
 			case 1:
 				// If it has been completed
-				console.log("One RunModel was added.");
+				executionMsg += "One RunModel was added."
+				console.log(executionMsg);
 				
 				if (results[0].get("status") == 2) {
 					// If it has been also failed
 					if (results[0].get("jobResult") == false) {
-						console.log("One RunModel job was added. status is Completed. jobResult was false.");
+						executionMsg += "status is Completed. jobResult was false."
+						console.log(executionMsg);
 						
 						ToCreate = true;
 						ResToCreate = results[0].get("resolution");;
 					}
 					// If it has been also successful
 					else {
-						console.log("One RunModel job was added. status is Completed. jobResult was successful.");
+						executionMsg += "status is Completed. jobResult was true."
+						console.log(executionMsg);
 						
 						ToCreate = true;
 						currRes = results[0].get("resolution");
@@ -3456,12 +3460,17 @@ Parse.Cloud.define("automateRunModel", function(request, response) {
 						});
 					}
 					
-				} else
-					console.log("One RunModel job has been added. status is not Complete. So we will wait for this job to complete.");
+				} else {
+					executionMsg += "status is not Complete. So we will wait for this job to complete. No job to add."
+					console.log(executionMsg);
+				}
 				
 				break; 
 			// If there have been more than 2 RunModel jobs added
 			default:
+				executionMsg += "More than 2 RunModel jobs have been added."
+				console.log(executionMsg);
+			
 				var isAllJobsCompleted = true;
 				
 				for (var i = 0; i < results.length; i++) {
@@ -3475,6 +3484,8 @@ Parse.Cloud.define("automateRunModel", function(request, response) {
 				
 				// If all jobs were already complete; we will find out the details.
 				if (isAllJobsCompleted) {
+					executionMsg += "Both RunModel jobs were with status of complete."
+					console.log(executionMsg);
 					
 					var predefined_rm_obs_list = [];
 					
@@ -3501,7 +3512,8 @@ Parse.Cloud.define("automateRunModel", function(request, response) {
 						}
 					}
 					
-					//console.log(predefined_rm_obs_list);
+					executionMsg += "'" + JSON.stringify(predefined_rm_obs_list) + "' ";
+					console.log(executionMsg);
 					// Find out whether there is need to create a new RunModel job
 					for (var k = 0; k < predefined_rm_obs_list.length; k++) {
 
@@ -3518,12 +3530,13 @@ Parse.Cloud.define("automateRunModel", function(request, response) {
 							ResToCreate = predefined_rm_obs_list[k]['resolution'];
 						}
 					}
-				} else
-					console.log("More than 2 RunModel job have been added. There is at least one job with its status being not Complete. So we will wait for this job to complete.");
-					
+				} else {
+					executionMsg += "There is at least one job with its status being not Complete. So we will wait for this job to complete."
+					console.log(executionMsg);
+				}
 		}		
 		
-		response.success({"ToCreate": ToCreate, "ResToCreate": ResToCreate});
+		response.success({"ToCreate": ToCreate, "ResToCreate": ResToCreate, 'executionMsg': executionMsg});
 	}, function(error) {
 		// An error occurred while deleting one or more of the objects.
 		// If this is an aggregate error, then we can inspect each error
