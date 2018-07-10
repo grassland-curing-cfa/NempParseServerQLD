@@ -36,6 +36,8 @@ var _IS_FIRE_DANGER_PERIOD = (process.env.IS_FIRE_DANGER_PERIOD == "1" ? true : 
 var GAE_APP_URL = process.env.GAE_APP_URL;			// The URL to the GAE app (appspot)
 var MAX_DAYS_ALLOWED_FOR_PREVIOUS_OBS = process.env.MAX_DAYS_ALLOWED_FOR_PREVIOUS_OBS;			// An obs with the FinalisedDate older than this number should not be returned and treated as Last Season data
 
+var RESOLUTIONS = ["500", "6000"];
+
 //var SHARED_WITH_STATES = ["SA", "NSW"];
 
 // Use Parse.Cloud.define to define as many cloud functions as you want.
@@ -3398,6 +3400,141 @@ Parse.Cloud.define("finaliseAdjustByDistAndLocOnParse", function(request, respon
 	});
 });
 */
+
+/**
+Automate RunModel by adding a RunModel given defined creteria.
+*/
+Parse.Cloud.define("automateRunModel", function(request, response) {
+	var executionResult = false;
+	var executionMsg = "";	
+
+	var ToCreate = false;
+	var ResToCreate;
+	
+	console.log("Triggering the Cloud Function 'automateRunModel'");
+	
+	// Get the parameters for startUTC and endUTC time period
+	var nowDt = new Date(new Date().toUTCString());
+	var today_utc_ts =  Date.UTC(nowDt.getUTCFullYear(), nowDt.getUTCMonth(), nowDt.getUTCDate(), 0, 0, 0);
+	var greaterThanDt = new Date(today_utc_ts);
+	
+	var queryRunModel = new Parse.Query("GCUR_RUNMODEL");
+	queryRunModel.greaterThan("createdAt", greaterThanDt);
+	queryRunModel.find().then(function(results) {
+		
+		switch (results.length) {
+		
+			// If no RunModel job has been added
+			case 0:
+				console.log("No RunModel was added.");
+				
+				ToCreate = true;
+				ResToCreate = RESOLUTIONS[0];
+				break;
+			// If there is 1 RunModel job that has been added
+			case 1:
+				// If it has been completed
+				console.log("One RunModel was added.");
+				
+				if (results[0].get("status") == 2) {
+					// If it has been also failed
+					if (results[0].get("jobResult") == false) {
+						console.log("One RunModel job was added. status is Completed. jobResult was false.");
+						
+						ToCreate = true;
+						ResToCreate = RESOLUTIONS[0];
+					}
+					// If it has been also successful
+					else {
+						console.log("One RunModel job was added. status is Completed. jobResult was successful.");
+						
+						currRes = results[0].get("resolution");
+						ResToCreate = RESOLUTIONS.find(function(element) {
+							return element != currRes;
+						});
+					}
+					
+				} else
+					console.log("One RunModel job has been added. status is not Complete. So we will wait for this job to complete.");
+				
+				break; 
+			// If there have been more than 2 RunModel jobs added
+			default:
+				var isAllJobsCompleted = true;
+				
+				for (var i = 0; i < results.length; i++) {
+					
+					// If any of the job was not complete (not started or in progress)
+					if (results[i].get("status") != 2) {
+						isAllJobsCompleted = false;
+						break;
+					}
+				}
+				
+				// If all jobs were already complete; we will find out the details.
+				if (isAllJobsCompleted) {
+					
+					var predefined_rm_obs_list = [];
+					
+					for (var j = 0; j < RESOLUTIONS.length; j++) {
+						var predefined_rm_obs = {
+							"resolution" : RESOLUTIONS[j],
+							"status" : undefined,
+							"jobResult" : undefined,
+							"jobResultDetails" : undefined
+						}
+						
+						predefined_rm_obs_list.push(predefined_rm_obs);
+					}		
+					
+					for (var k = 0; k < predefined_rm_obs.length; k++) {				
+						for (var i = 0; i < results.length; i++) {
+							if (results[i].get("resolution") == predefined_rm_obs[k]['resolution']) {
+								if (predefined_rm_obs[k]['jobResult'] != true) {
+									predefined_rm_obs[k]['status'] = results[i].get("status");
+									predefined_rm_obs[k]['jobResult'] = results[i].get("jobResult");
+									predefined_rm_obs[k]['jobResultDetails'] = results[i].get("jobResultDetails");
+								}
+							}
+						}
+					}
+					
+					console.log(predefined_rm_obs);
+				} else
+					console.log("More than 2 RunModel job have been added. There is at least one job with its status being not Complete. So we will wait for this job to complete.");
+			
+				
+		
+		}
+		
+		
+		response.success();  //saveAll is now finished and we can properly exit with confidence :-)
+	
+		
+		
+		
+		
+		
+		
+		
+	
+	}, function(error) {
+		// An error occurred while deleting one or more of the objects.
+		// If this is an aggregate error, then we can inspect each error
+		// object individually to determine the reason why a particular
+		// object was not deleted.
+	    if (error.code === Parse.Error.AGGREGATE_ERROR) {
+	    	for (var i = 0; i < error.errors.length; i++) {
+	          console.log("Couldn't delete " + error.errors[i].object.id +
+	            "due to " + error.errors[i].message);
+	        }
+	    } else {
+	    	console.log("Delete aborted because of " + error.message);
+	    }
+		console.log('Failed to delete GCUR_RUNMODEL record[' + objectId + '].');
+		response.success(false);
+	});
+});
 
 /**
  * An Underscore utility function to find elements in array that are not in another array;
