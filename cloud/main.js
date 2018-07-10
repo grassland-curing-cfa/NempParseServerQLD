@@ -3492,10 +3492,12 @@ Parse.Cloud.define("automateRunModel", function(request, response) {
 						for (var i = 0; i < results.length; i++) {
 							if (results[i].get("resolution") == predefined_rm_obs[k]['resolution']) {
 								if (predefined_rm_obs[k]['jobResult'] != true) {
+									console.log("false - " + results[i].id);
 									predefined_rm_obs[k]['status'] = results[i].get("status");
 									predefined_rm_obs[k]['jobResult'] = results[i].get("jobResult");
 									predefined_rm_obs[k]['jobResultDetails'] = results[i].get("jobResultDetails");
-								}
+								} else
+									console.log("true - "results[i].id);
 							}
 						}
 					}
