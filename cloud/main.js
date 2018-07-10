@@ -3443,7 +3443,7 @@ Parse.Cloud.define("automateRunModel", function(request, response) {
 						console.log("One RunModel job was added. status is Completed. jobResult was false.");
 						
 						ToCreate = true;
-						ResToCreate = RESOLUTIONS[0];
+						ResToCreate = results[0].get("resolution");;
 					}
 					// If it has been also successful
 					else {
