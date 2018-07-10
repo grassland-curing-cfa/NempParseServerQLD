@@ -3488,16 +3488,16 @@ Parse.Cloud.define("automateRunModel", function(request, response) {
 						predefined_rm_obs_list.push(predefined_rm_obs);
 					}		
 					
-					for (var k = 0; k < predefined_rm_obs.length; k++) {
+					for (var k = 0; k < predefined_rm_obs_list.length; k++) {
 						console.log("k = " + k);
 						for (var i = 0; i < results.length; i++) {
 							console.log("i = " + i);
-							if (results[i].get("resolution") == predefined_rm_obs[k]['resolution']) {
-								if (predefined_rm_obs[k]['jobResult'] != true) {
+							if (results[i].get("resolution") == predefined_rm_obs_list[k]['resolution']) {
+								if (predefined_rm_obs_list[k]['jobResult'] != true) {
 									console.log("false - " + results[i].id);
-									predefined_rm_obs[k]['status'] = results[i].get("status");
-									predefined_rm_obs[k]['jobResult'] = results[i].get("jobResult");
-									predefined_rm_obs[k]['jobResultDetails'] = results[i].get("jobResultDetails");
+									predefined_rm_obs_list[k]['status'] = results[i].get("status");
+									predefined_rm_obs_list[k]['jobResult'] = results[i].get("jobResult");
+									predefined_rm_obs_list[k]['jobResultDetails'] = results[i].get("jobResultDetails");
 								} else
 									console.log("true - " + results[i].id);
 							} else
@@ -3505,7 +3505,7 @@ Parse.Cloud.define("automateRunModel", function(request, response) {
 						}
 					}
 					
-					console.log(predefined_rm_obs);
+					console.log(predefined_rm_obs_list);
 				} else
 					console.log("More than 2 RunModel job have been added. There is at least one job with its status being not Complete. So we will wait for this job to complete.");
 			
