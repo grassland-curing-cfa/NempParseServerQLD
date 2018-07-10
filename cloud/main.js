@@ -3406,7 +3406,8 @@ Automate RunModel by adding a RunModel given defined creteria.
 */
 Parse.Cloud.define("automateRunModel", function(request, response) {
 	var executionResult = false;
-	var executionMsg = "";	
+	var executionMsg = "";
+	var isJobAdded = false;
 
 	var ToCreate = false;
 	var ResToCreate = "";
@@ -3536,10 +3537,7 @@ Parse.Cloud.define("automateRunModel", function(request, response) {
 				}
 		}
 		
-		return Parse.Promise.as("Current RunModel jobs have been checked. Continue... ...");
-		
-		//response.success({"ToCreate": ToCreate, "ResToCreate": ResToCreate, 'executionMsg': executionMsg});
-		
+		return Parse.Promise.as("Current RunModel jobs have been checked. Continue... ...");		
 	}).then(function() {
 		// Save a new RunModel job based on ResToCreate
 		if (ToCreate) {
@@ -3557,19 +3555,20 @@ Parse.Cloud.define("automateRunModel", function(request, response) {
 			}, {
 				success: function(obj) {
 					// The save was successful.
+					isJobAdded = true;
 					executionMsg += "A new RunModel job with resolution of " + ResToCreate + " has been successfully saved."
 					console.log(executionMsg);
-					response.success({"ToCreate": ToCreate, "ResToCreate": ResToCreate, 'executionMsg': executionMsg});
+					response.success({"ToCreate": ToCreate, "ResToCreate": ResToCreate, 'executionMsg': executionMsg, 'isJobAdded': isJobAdded});
 				},
 				error: function(successful, error) {
 					// The save failed.  Error is an instance of Parse.Error.
 					executionMsg += "There was an error in saving a new RunModel job with resolution of " + ResToCreate;
 					console.log(executionMsg);
-					response.error({"ToCreate": ToCreate, "ResToCreate": ResToCreate, 'executionMsg': executionMsg});
+					response.error({"ToCreate": ToCreate, "ResToCreate": ResToCreate, 'executionMsg': executionMsg, 'isJobAdded': isJobAdded});
 				}
 			});
 		} else
-			response.success({"ToCreate": ToCreate, "ResToCreate": ResToCreate, 'executionMsg': executionMsg});
+			response.success({"ToCreate": ToCreate, "ResToCreate": ResToCreate, 'executionMsg': executionMsg, 'isJobAdded': isJobAdded});
 	}, function(error) {
 		// An error occurred while deleting one or more of the objects.
 		// If this is an aggregate error, then we can inspect each error
