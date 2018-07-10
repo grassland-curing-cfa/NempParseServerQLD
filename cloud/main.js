@@ -3534,9 +3534,42 @@ Parse.Cloud.define("automateRunModel", function(request, response) {
 					executionMsg += "There is at least one job with its status being not Complete. So we will wait for this job to complete."
 					console.log(executionMsg);
 				}
-		}		
+		}
 		
-		response.success({"ToCreate": ToCreate, "ResToCreate": ResToCreate, 'executionMsg': executionMsg});
+		return Parse.Promise.as("Current RunModel jobs have been checked. Continue... ...");
+		
+		//response.success({"ToCreate": ToCreate, "ResToCreate": ResToCreate, 'executionMsg': executionMsg});
+		
+	}).then(function() {
+		// Save a new RunModel job based on ResToCreate
+		if (ToCreate) {
+			var GCUR_RUNMODEL = Parse.Object.extend("GCUR_RUNMODEL");
+			var newRMJob = new GCUR_RUNMODEL();				// a new GCUR_RUNMODEL object to be saved
+			
+			//newRMJob.set("status", 0);
+			//newRMJob.set("resolution", ResToCreate);
+			//newRMJob.set("jobResult", false);
+			
+			newRMJob.save({
+				status: 0,
+				resolution: ResToCreate,
+				jobResult: false
+			}, {
+				success: function(obj) {
+					// The save was successful.
+					executionMsg += "A new RunModel job with resolution of " + ResToCreate + " has been successfully saved."
+					console.log(executionMsg);
+					response.success({"ToCreate": ToCreate, "ResToCreate": ResToCreate, 'executionMsg': executionMsg});
+				},
+				error: function(successful, error) {
+					// The save failed.  Error is an instance of Parse.Error.
+					executionMsg += "There was an error in saving a new RunModel job with resolution of " + ResToCreate;
+					console.log(executionMsg);
+					response.error({"ToCreate": ToCreate, "ResToCreate": ResToCreate, 'executionMsg': executionMsg});
+				}
+			});
+		} else
+			response.success({"ToCreate": ToCreate, "ResToCreate": ResToCreate, 'executionMsg': executionMsg});
 	}, function(error) {
 		// An error occurred while deleting one or more of the objects.
 		// If this is an aggregate error, then we can inspect each error
@@ -3550,7 +3583,6 @@ Parse.Cloud.define("automateRunModel", function(request, response) {
 	    } else {
 	    	console.log("Delete aborted because of " + error.message);
 	    }
-		console.log('Failed to delete GCUR_RUNMODEL record[' + objectId + '].');
 		response.success(false);
 	});
 });
