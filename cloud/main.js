@@ -3511,7 +3511,8 @@ Parse.Cloud.define("automateRunModel", function(request, response) {
 								ToCreate = true;
 								ResToCreate = predefined_rm_obs_list[k]['resolution'];
 								break;		// We always want to add a new RunModel model for those failed one first
-							}
+							} else
+								console.log(predefined_rm_obs_list[k]['resolution'] + ": " + predefined_rm_obs_list[k]['jobResult']);
 						} else {
 							ToCreate = true;
 							ResToCreate = predefined_rm_obs_list[k]['resolution'];
