@@ -3548,11 +3548,18 @@ Parse.Cloud.define("automateRunModel", function(request, response) {
 			//newRMJob.set("resolution", ResToCreate);
 			//newRMJob.set("jobResult", false);
 			
+			// Had to add a fake user ...
+			var admin = new Parse.User();
+			admin.id = "Gy7V34YZwW";
+			
 			newRMJob.save({
 				status: 0,
 				resolution: ResToCreate,
-				jobResult: false
+				jobResult: false,
+				submittedBy: admin
 			}, {
+				useMasterKey: true,
+			
 				success: function(obj) {
 					// The save was successful.
 					isJobAdded = true;
@@ -3560,6 +3567,7 @@ Parse.Cloud.define("automateRunModel", function(request, response) {
 					console.log(executionMsg);
 					response.success({"ToCreate": ToCreate, "ResToCreate": ResToCreate, 'executionMsg': executionMsg, 'isJobAdded': isJobAdded});
 				},
+				
 				error: function(successful, error) {
 					// The save failed.  Error is an instance of Parse.Error.
 					executionMsg += "There was an error in saving a new RunModel job with resolution of " + ResToCreate;
