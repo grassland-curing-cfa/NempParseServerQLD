@@ -3551,7 +3551,7 @@ Parse.Cloud.define("automateRunModel", function(request, response) {
 			newRMJob.save({
 				status: 0,
 				resolution: ResToCreate,
-				jobResulte: false
+				jobResult: false
 			}, {
 				success: function(obj) {
 					// The save was successful.
