@@ -3488,8 +3488,10 @@ Parse.Cloud.define("automateRunModel", function(request, response) {
 						predefined_rm_obs_list.push(predefined_rm_obs);
 					}		
 					
-					for (var k = 0; k < predefined_rm_obs.length; k++) {				
+					for (var k = 0; k < predefined_rm_obs.length; k++) {
+						console.log("k = " + k);
 						for (var i = 0; i < results.length; i++) {
+							console.log("i = " + i);
 							if (results[i].get("resolution") == predefined_rm_obs[k]['resolution']) {
 								if (predefined_rm_obs[k]['jobResult'] != true) {
 									console.log("false - " + results[i].id);
@@ -3498,7 +3500,8 @@ Parse.Cloud.define("automateRunModel", function(request, response) {
 									predefined_rm_obs[k]['jobResultDetails'] = results[i].get("jobResultDetails");
 								} else
 									console.log("true - " + results[i].id);
-							}
+							} else
+								console.log("FLAG");
 						}
 					}
 					
