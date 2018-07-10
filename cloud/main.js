@@ -37,6 +37,7 @@ var GAE_APP_URL = process.env.GAE_APP_URL;			// The URL to the GAE app (appspot)
 var MAX_DAYS_ALLOWED_FOR_PREVIOUS_OBS = process.env.MAX_DAYS_ALLOWED_FOR_PREVIOUS_OBS;			// An obs with the FinalisedDate older than this number should not be returned and treated as Last Season data
 
 var RESOLUTIONS = ["500", "6000"];
+var SUPERUSER_OBJECTID = "Gy7V34YZwW";
 
 //var SHARED_WITH_STATES = ["SA", "NSW"];
 
@@ -3544,13 +3545,9 @@ Parse.Cloud.define("automateRunModel", function(request, response) {
 			var GCUR_RUNMODEL = Parse.Object.extend("GCUR_RUNMODEL");
 			var newRMJob = new GCUR_RUNMODEL();				// a new GCUR_RUNMODEL object to be saved
 			
-			//newRMJob.set("status", 0);
-			//newRMJob.set("resolution", ResToCreate);
-			//newRMJob.set("jobResult", false);
-			
-			// Had to add a fake user ...
+			// Had to add a fake user ... REQUIRE AMENDMENT!!!
 			var admin = new Parse.User();
-			admin.id = "Gy7V34YZwW";
+			admin.id = SUPERUSER_OBJECTID;
 			
 			newRMJob.save({
 				status: 0,
