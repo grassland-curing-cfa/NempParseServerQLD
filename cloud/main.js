@@ -3497,7 +3497,7 @@ Parse.Cloud.define("automateRunModel", function(request, response) {
 									predefined_rm_obs[k]['jobResult'] = results[i].get("jobResult");
 									predefined_rm_obs[k]['jobResultDetails'] = results[i].get("jobResultDetails");
 								} else
-									console.log("true - "results[i].id);
+									console.log("true - " + results[i].id);
 							}
 						}
 					}
