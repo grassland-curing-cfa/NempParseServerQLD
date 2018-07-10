@@ -3417,6 +3417,7 @@ Parse.Cloud.define("automateRunModel", function(request, response) {
 	var nowDt = new Date(new Date().toUTCString());
 	var today_utc_ts =  Date.UTC(nowDt.getUTCFullYear(), nowDt.getUTCMonth(), nowDt.getUTCDate(), 0, 0, 0);
 	var greaterThanDt = new Date(today_utc_ts);
+	console.log("Today starting at " + greaterThanDt);
 	
 	var queryRunModel = new Parse.Query("GCUR_RUNMODEL");
 	queryRunModel.greaterThan("createdAt", greaterThanDt);
