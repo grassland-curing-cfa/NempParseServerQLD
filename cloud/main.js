@@ -3409,7 +3409,7 @@ Parse.Cloud.define("automateRunModel", function(request, response) {
 	var executionMsg = "";	
 
 	var ToCreate = false;
-	var ResToCreate;
+	var ResToCreate = "";
 	
 	console.log("Triggering the Cloud Function 'automateRunModel'");
 	
@@ -3489,41 +3489,39 @@ Parse.Cloud.define("automateRunModel", function(request, response) {
 					}		
 					
 					for (var k = 0; k < predefined_rm_obs_list.length; k++) {
-						console.log("k = " + k);
 						for (var i = 0; i < results.length; i++) {
-							console.log("i = " + i);
 							if (results[i].get("resolution") == predefined_rm_obs_list[k]['resolution']) {
 								if (predefined_rm_obs_list[k]['jobResult'] != true) {
-									console.log("false - " + results[i].id);
 									predefined_rm_obs_list[k]['status'] = results[i].get("status");
 									predefined_rm_obs_list[k]['jobResult'] = results[i].get("jobResult");
 									predefined_rm_obs_list[k]['jobResultDetails'] = results[i].get("jobResultDetails");
-								} else
-									console.log("true - " + results[i].id);
-							} else
-								console.log("FLAG");
+								}
+							}
 						}
 					}
 					
-					console.log(predefined_rm_obs_list);
+					//console.log(predefined_rm_obs_list);
+					// Find out whether there is need to create a new RunModel job
+					for (var k = 0; k < predefined_rm_obs_list.length; k++) {
+
+						if (predefined_rm_obs_list[k]['status'] != undefined) {
+							// If this RunModel job was failed
+							if (predefined_rm_obs_list[k]['jobResult'] != true) {
+								ToCreate = true;
+								ResToCreate = predefined_rm_obs_list[k]['resolution'];
+								break;		// We always want to add a new RunModel model for those failed one first
+							}
+						} else {
+							ToCreate = true;
+							ResToCreate = predefined_rm_obs_list[k]['resolution'];
+						}
+					}
 				} else
 					console.log("More than 2 RunModel job have been added. There is at least one job with its status being not Complete. So we will wait for this job to complete.");
-			
-				
+					
+		}		
 		
-		}
-		
-		
-		response.success();  //saveAll is now finished and we can properly exit with confidence :-)
-	
-		
-		
-		
-		
-		
-		
-		
-	
+		response.success({"ToCreate": ToCreate, "ResToCreate": ResToCreate});
 	}, function(error) {
 		// An error occurred while deleting one or more of the objects.
 		// If this is an aggregate error, then we can inspect each error
