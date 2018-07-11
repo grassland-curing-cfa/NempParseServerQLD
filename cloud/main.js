@@ -3486,7 +3486,7 @@ Parse.Cloud.define("automateRunModel", function(request, response) {
 				
 				// If all jobs were already complete; we will find out the details.
 				if (isAllJobsCompleted) {
-					executionMsg += "Both RunModel jobs were with status of complete."
+					executionMsg += "All RunModel jobs were with status of complete."
 					console.log(executionMsg);
 					
 					var predefined_rm_obs_list = [];
@@ -3599,6 +3599,7 @@ Parse.Cloud.define("automateFinaliseData", function(request, response) {
 	var executionMsg = "";
 	var isJobAdded = false;
 
+	var isRunModelsSuccessful = false;
 	var ToCreate = false;
 	
 	console.log("Triggering the Cloud Function 'automateFinaliseData'");
@@ -3609,50 +3610,141 @@ Parse.Cloud.define("automateFinaliseData", function(request, response) {
 	var greaterThanDt = new Date(today_utc_ts);
 	console.log("Today starting at " + greaterThanDt);
 	
-	var queryFinaliseData = new Parse.Query("GCUR_FINALISEMODEL");
-	queryFinaliseData.greaterThan("createdAt", greaterThanDt);
-	queryFinaliseData.find().then(function(results) {
+	// Query the GCUR_RUNMODEL table to find out if the RunModel jobs for both resolutions have been successfully run
+	// This is for double check to be more secure that we are not adding a FinaliseData job if RunModels were not successful.
+	var queryRunModel = new Parse.Query("GCUR_RUNMODEL");
+	queryRunModel.greaterThan("createdAt", greaterThanDt);
+	queryRunModel.find().then(function(results) {
 		
 		switch (results.length) {
 		
-			// If no FinaliseData job has been added
+			// If no RunModel job has been added
 			case 0:
-				executionMsg += "No FinaliseData job was added."
+				executionMsg += "No RunModel job was added. FinaliseData job will be added."
 				console.log(executionMsg);
-				
-				ToCreate = true;
+
 				break;
-			// If there is 1 FinaliseData job that has been added
+				
+			// If there is 1 RunModel job that has been added
 			case 1:
 				// If it has been completed
-				executionMsg += "One FinaliseData job was already added."
+				executionMsg += "One RunModel job was added. FinaliseData job will be added."
 				console.log(executionMsg);
 				
-				if (results[0].get("status") == 2) {
-					// If it has been also failed
-					if (results[0].get("jobResult") == false) {
-						executionMsg += "status is Completed. jobResult was false. No job to add."
-						console.log(executionMsg);
+				break;
+			
+			// If there have been more than 2 RunModel jobs added
+			default:
+				executionMsg += "More than 2 RunModel jobs have been added."
+				console.log(executionMsg);
+			
+				var isAllJobsCompleted = true;
+				
+				for (var i = 0; i < results.length; i++) {
+					
+					// If any of the job was not complete (not started or in progress)
+					if (results[i].get("status") != 2) {
+						isAllJobsCompleted = false;
+						break;
 					}
-					// If it has been also successful
-					else {
-						executionMsg += "status is Completed. jobResult was true. No job to add."
+				}
+				
+				// If all jobs were already complete; we will find out the details.
+				if (isAllJobsCompleted) {
+					executionMsg += "All RunModel jobs were with status of complete."
+					console.log(executionMsg);
+					
+					var predefined_rm_obs_list = [];
+					
+					for (var j = 0; j < RESOLUTIONS.length; j++) {
+						var predefined_rm_obs = {
+							"resolution" : RESOLUTIONS[j],
+							"status" : undefined,
+							"jobResult" : undefined,
+							"jobResultDetails" : undefined
+						}
+						
+						predefined_rm_obs_list.push(predefined_rm_obs);
+					}		
+					
+					for (var k = 0; k < predefined_rm_obs_list.length; k++) {
+						for (var i = 0; i < results.length; i++) {
+							if (results[i].get("resolution") == predefined_rm_obs_list[k]['resolution']) {
+								if (predefined_rm_obs_list[k]['jobResult'] != true) {
+									predefined_rm_obs_list[k]['status'] = results[i].get("status");
+									predefined_rm_obs_list[k]['jobResult'] = results[i].get("jobResult");
+									predefined_rm_obs_list[k]['jobResultDetails'] = results[i].get("jobResultDetails");
+								}
+							}
+						}
+					}
+					
+					executionMsg += "'" + JSON.stringify(predefined_rm_obs_list) + "' ";
+					console.log(executionMsg);
+					
+					// Find out whether RunModel jobs for both resolutions were already successful
+					isRunModelsSuccessful = predefined_rm_obs_list.every(function(rm) {return (rm['status'] == 2) && (rm['jobResult'] == true);});
+					
+					
+					
+				} else {
+					executionMsg += "There is at least one job with its status being not Complete. So we will wait for this job to complete."
+					console.log(executionMsg);
+				}
+		}
+		
+		if (isRunModelsSuccessful) {
+			return Parse.Promise.as("isRunModelsSuccessful is true!");
+		} else {
+			return Parse.Promise.error("isRunModelsSuccessful is false!");
+		}
+		
+	}).then(function() {
+	
+		var queryFinaliseData = new Parse.Query("GCUR_FINALISEMODEL");
+		queryFinaliseData.greaterThan("createdAt", greaterThanDt);
+		queryFinaliseData.find().then(function(results) {
+			
+			switch (results.length) {
+			
+				// If no FinaliseData job has been added
+				case 0:
+					executionMsg += "No FinaliseData job was added."
+					console.log(executionMsg);
+					
+					ToCreate = true;
+					break;
+				// If there is 1 FinaliseData job that has been added
+				case 1:
+					// If it has been completed
+					executionMsg += "One FinaliseData job was already added."
+					console.log(executionMsg);
+					
+					if (results[0].get("status") == 2) {
+						// If it has been also failed
+						if (results[0].get("jobResult") == false) {
+							executionMsg += "status is Completed. jobResult was false. No job to add."
+							console.log(executionMsg);
+						}
+						// If it has been also successful
+						else {
+							executionMsg += "status is Completed. jobResult was true. No job to add."
+							console.log(executionMsg);
+						}
+						
+					} else {
+						executionMsg += "status is not Complete. So we will wait for this job to complete. No job to add."
 						console.log(executionMsg);
 					}
 					
-				} else {
-					executionMsg += "status is not Complete. So we will wait for this job to complete. No job to add."
+					break; 
+				// If there have been more than 2 FinaliseData jobs added
+				default:
+					executionMsg += "More than 2 FinaliseData jobs have been added. No job to add."
 					console.log(executionMsg);
-				}
-				
-				break; 
-			// If there have been more than 2 FinaliseData jobs added
-			default:
-				executionMsg += "More than 2 FinaliseData jobs have been added. No job to add."
-				console.log(executionMsg);
-		}
-		
-		return Parse.Promise.as("Current FinaliseData jobs have been checked. Continue... ...");		
+			}
+			
+			return Parse.Promise.as("Current FinaliseData jobs have been checked. Continue... ...");		
 	}).then(function() {
 		// Save a new FinalisedData job based on ResToCreate
 		if (ToCreate) {
