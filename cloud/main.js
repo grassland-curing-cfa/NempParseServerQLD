@@ -3703,7 +3703,8 @@ Parse.Cloud.define("automateFinaliseData", function(request, response) {
 	
 		var queryFinaliseData = new Parse.Query("GCUR_FINALISEMODEL");
 		queryFinaliseData.greaterThan("createdAt", greaterThanDt);
-		queryFinaliseData.find().then(function(results) {
+		return queryFinaliseData.find();
+	}).then(function(results) {
 			
 			switch (results.length) {
 			
