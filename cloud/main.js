@@ -3683,9 +3683,12 @@ Parse.Cloud.define("automateFinaliseData", function(request, response) {
 					console.log(executionMsg);
 					
 					// Find out whether RunModel jobs for both resolutions were already successful
-					isRunModelsSuccessful = predefined_rm_obs_list.every(function(rm) {return (rm['status'] == 2) && (rm['jobResult'] == true);});
-					
-					
+					isRunModelsSuccessful = predefined_rm_obs_list.every(function(rm) {
+						return (rm['status'] == 2) && (rm['jobResult'] == true);
+						}
+					);
+					executionMsg += ". isRunModelsSuccessful = " + isRunModelsSuccessful + ".";
+					console.log(executionMsg);
 					
 				} else {
 					executionMsg += "There is at least one job with its status being not Complete. So we will wait for this job to complete."
@@ -3781,19 +3784,7 @@ Parse.Cloud.define("automateFinaliseData", function(request, response) {
 		} else
 			response.success({"ToCreate": ToCreate, 'executionMsg': executionMsg, 'isJobAdded': isJobAdded});
 	}, function(error) {
-		// An error occurred while deleting one or more of the objects.
-		// If this is an aggregate error, then we can inspect each error
-		// object individually to determine the reason why a particular
-		// object was not deleted.
-	    if (error.code === Parse.Error.AGGREGATE_ERROR) {
-	    	for (var i = 0; i < error.errors.length; i++) {
-	          console.log("Couldn't delete " + error.errors[i].object.id +
-	            "due to " + error.errors[i].message);
-	        }
-	    } else {
-	    	console.log("Delete aborted because of " + error.message);
-	    }
-		response.success(false);
+		response.error("Error: " + error);
 	});
 });
 
