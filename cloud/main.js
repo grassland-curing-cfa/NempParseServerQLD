@@ -3620,7 +3620,7 @@ Parse.Cloud.define("automateFinaliseData", function(request, response) {
 		
 			// If no RunModel job has been added
 			case 0:
-				executionMsg += "No RunModel job was added. FinaliseData job will be added."
+				executionMsg += "No RunModel job was added. FinaliseData job will not be added.";
 				console.log(executionMsg);
 
 				break;
@@ -3628,7 +3628,7 @@ Parse.Cloud.define("automateFinaliseData", function(request, response) {
 			// If there is 1 RunModel job that has been added
 			case 1:
 				// If it has been completed
-				executionMsg += "One RunModel job was added. FinaliseData job will be added."
+				executionMsg += "One RunModel job was added. FinaliseData job will not be added.";
 				console.log(executionMsg);
 				
 				break;
@@ -3685,13 +3685,13 @@ Parse.Cloud.define("automateFinaliseData", function(request, response) {
 					// Find out whether RunModel jobs for both resolutions were already successful
 					isRunModelsSuccessful = predefined_rm_obs_list.every(function(rm) {
 						return (rm['status'] == 2) && (rm['jobResult'] == true);
-						}
-					);
+					});
+					
 					executionMsg += ". isRunModelsSuccessful = " + isRunModelsSuccessful + ".";
 					console.log(executionMsg);
 					
 				} else {
-					executionMsg += "There is at least one job with its status being not Complete. So we will wait for this job to complete."
+					executionMsg += "There is at least one RunModel job with its status being 'not Complete'. So we will wait for this job to complete."
 					console.log(executionMsg);
 				}
 		}
@@ -3699,21 +3699,18 @@ Parse.Cloud.define("automateFinaliseData", function(request, response) {
 		if (isRunModelsSuccessful) {
 			return Parse.Promise.as("isRunModelsSuccessful is true!");
 		} else {
-			return Parse.Promise.error("isRunModelsSuccessful is false!");
-		}
-		
-	}).then(function() {
-	
+			return Parse.Promise.error("isRunModelsSuccessful is false!");	// Go straight to the error callback at the end
+		}		
+	}).then(function() {	
 		var queryFinaliseData = new Parse.Query("GCUR_FINALISEMODEL");
 		queryFinaliseData.greaterThan("createdAt", greaterThanDt);
 		return queryFinaliseData.find();
-	}).then(function(results) {
-			
-			switch (results.length) {
+	}).then(function(results) {			
+		switch (results.length) {
 			
 				// If no FinaliseData job has been added
 				case 0:
-					executionMsg += "No FinaliseData job was added."
+					executionMsg += "No FinaliseData job was added. "
 					console.log(executionMsg);
 					
 					ToCreate = true;
@@ -3721,34 +3718,34 @@ Parse.Cloud.define("automateFinaliseData", function(request, response) {
 				// If there is 1 FinaliseData job that has been added
 				case 1:
 					// If it has been completed
-					executionMsg += "One FinaliseData job was already added."
+					executionMsg += "One FinaliseData job was already added. "
 					console.log(executionMsg);
 					
 					if (results[0].get("status") == 2) {
 						// If it has been also failed
 						if (results[0].get("jobResult") == false) {
-							executionMsg += "status is Completed. jobResult was false. No job to add."
+							executionMsg += "status is Completed. jobResult was false. No FinaliseData job to add."
 							console.log(executionMsg);
 						}
 						// If it has been also successful
 						else {
-							executionMsg += "status is Completed. jobResult was true. No job to add."
+							executionMsg += "status is Completed. jobResult was true. No FinaliseData job to add."
 							console.log(executionMsg);
 						}
 						
 					} else {
-						executionMsg += "status is not Complete. So we will wait for this job to complete. No job to add."
+						executionMsg += "status is not Complete. So we will wait for this FinaliseData job to complete. No job to add."
 						console.log(executionMsg);
 					}
 					
 					break; 
 				// If there have been more than 2 FinaliseData jobs added
 				default:
-					executionMsg += "More than 2 FinaliseData jobs have been added. No job to add."
+					executionMsg += "More than 2 FinaliseData jobs have been added. No FinaliseData job to add."
 					console.log(executionMsg);
-			}
+		}
 			
-			return Parse.Promise.as("Current FinaliseData jobs have been checked. Continue... ...");		
+		return Parse.Promise.as("Current FinaliseData jobs have been checked. Continue... ...");		
 	}).then(function() {
 		// Save a new FinalisedData job based on ResToCreate
 		if (ToCreate) {
@@ -3778,13 +3775,13 @@ Parse.Cloud.define("automateFinaliseData", function(request, response) {
 					// The save failed.  Error is an instance of Parse.Error.
 					executionMsg += "There was an error in saving a new FinalisedData job.";
 					console.log(executionMsg);
-					response.error({"ToCreate": ToCreate, 'executionMsg': executionMsg, 'isJobAdded': isJobAdded});
+					response.error({"ToCreate": ToCreate, 'executionMsg': executionMsg, 'isJobAdded': isJobAdded, 'error': error});
 				}
 			});
 		} else
 			response.success({"ToCreate": ToCreate, 'executionMsg': executionMsg, 'isJobAdded': isJobAdded});
 	}, function(error) {
-		response.error({"ToCreate": ToCreate, 'executionMsg': executionMsg, 'isJobAdded': isJobAdded});
+		response.error({"ToCreate": ToCreate, 'executionMsg': executionMsg, 'isJobAdded': isJobAdded, 'error': error});
 	});
 });
 
