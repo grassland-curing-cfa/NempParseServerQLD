@@ -3429,7 +3429,7 @@ Parse.Cloud.define("automateRunModel", function(request, response) {
 		
 			// If no RunModel job has been added
 			case 0:
-				executionMsg += "No RunModel was added."
+				executionMsg += "No RunModel job was added."
 				console.log(executionMsg);
 				
 				ToCreate = true;
@@ -3438,7 +3438,7 @@ Parse.Cloud.define("automateRunModel", function(request, response) {
 			// If there is 1 RunModel job that has been added
 			case 1:
 				// If it has been completed
-				executionMsg += "One RunModel was added."
+				executionMsg += "One RunModel job was added."
 				console.log(executionMsg);
 				
 				if (results[0].get("status") == 2) {
@@ -3574,6 +3574,119 @@ Parse.Cloud.define("automateRunModel", function(request, response) {
 			});
 		} else
 			response.success({"ToCreate": ToCreate, "ResToCreate": ResToCreate, 'executionMsg': executionMsg, 'isJobAdded': isJobAdded});
+	}, function(error) {
+		// An error occurred while deleting one or more of the objects.
+		// If this is an aggregate error, then we can inspect each error
+		// object individually to determine the reason why a particular
+		// object was not deleted.
+	    if (error.code === Parse.Error.AGGREGATE_ERROR) {
+	    	for (var i = 0; i < error.errors.length; i++) {
+	          console.log("Couldn't delete " + error.errors[i].object.id +
+	            "due to " + error.errors[i].message);
+	        }
+	    } else {
+	    	console.log("Delete aborted because of " + error.message);
+	    }
+		response.success(false);
+	});
+});
+
+/**
+Automate FinaliseData by adding a FinaliseData given defined creteria.
+*/
+Parse.Cloud.define("automateFinaliseData", function(request, response) {
+	var executionResult = false;
+	var executionMsg = "";
+	var isJobAdded = false;
+
+	var ToCreate = false;
+	
+	console.log("Triggering the Cloud Function 'automateFinaliseData'");
+	
+	// Get the parameters for startUTC and endUTC time period
+	var nowDt = new Date(new Date().toUTCString());
+	var today_utc_ts =  Date.UTC(nowDt.getUTCFullYear(), nowDt.getUTCMonth(), nowDt.getUTCDate(), 0, 0, 0);
+	var greaterThanDt = new Date(today_utc_ts);
+	console.log("Today starting at " + greaterThanDt);
+	
+	var queryFinaliseData = new Parse.Query("GCUR_FINALISEMODEL");
+	queryFinaliseData.greaterThan("createdAt", greaterThanDt);
+	queryFinaliseData.find().then(function(results) {
+		
+		switch (results.length) {
+		
+			// If no FinaliseData job has been added
+			case 0:
+				executionMsg += "No FinaliseData job was added."
+				console.log(executionMsg);
+				
+				ToCreate = true;
+				break;
+			// If there is 1 FinaliseData job that has been added
+			case 1:
+				// If it has been completed
+				executionMsg += "One FinaliseData job was already added."
+				console.log(executionMsg);
+				
+				if (results[0].get("status") == 2) {
+					// If it has been also failed
+					if (results[0].get("jobResult") == false) {
+						executionMsg += "status is Completed. jobResult was false. No job to add."
+						console.log(executionMsg);
+					}
+					// If it has been also successful
+					else {
+						executionMsg += "status is Completed. jobResult was true. No job to add."
+						console.log(executionMsg);
+					}
+					
+				} else {
+					executionMsg += "status is not Complete. So we will wait for this job to complete. No job to add."
+					console.log(executionMsg);
+				}
+				
+				break; 
+			// If there have been more than 2 FinaliseData jobs added
+			default:
+				executionMsg += "More than 2 FinaliseData jobs have been added. No job to add."
+				console.log(executionMsg);
+		}
+		
+		return Parse.Promise.as("Current FinaliseData jobs have been checked. Continue... ...");		
+	}).then(function() {
+		// Save a new FinalisedData job based on ResToCreate
+		if (ToCreate) {
+			var GCUR_FINALISEMODEL = Parse.Object.extend("GCUR_FINALISEMODEL");
+			var newFDJob = new GCUR_FINALISEMODEL();				// a new GCUR_FINALISEMODEL object to be saved
+			
+			// Had to add a fake user ... REQUIRE AMENDMENT!!!
+			var admin = new Parse.User();
+			admin.id = SUPERUSER_OBJECTID;
+			
+			newFDJob.save({
+				status: 0,
+				jobResult: false,
+				submittedBy: admin
+			}, {
+				useMasterKey: true,
+			
+				success: function(obj) {
+					// The save was successful.
+					isJobAdded = true;
+					executionMsg += "A new FinalisedData job has been successfully saved."
+					console.log(executionMsg);
+					response.success({"ToCreate": ToCreate, 'executionMsg': executionMsg, 'isJobAdded': isJobAdded});
+				},
+				
+				error: function(successful, error) {
+					// The save failed.  Error is an instance of Parse.Error.
+					executionMsg += "There was an error in saving a new FinalisedData job.";
+					console.log(executionMsg);
+					response.error({"ToCreate": ToCreate, 'executionMsg': executionMsg, 'isJobAdded': isJobAdded});
+				}
+			});
+		} else
+			response.success({"ToCreate": ToCreate, 'executionMsg': executionMsg, 'isJobAdded': isJobAdded});
 	}, function(error) {
 		// An error occurred while deleting one or more of the objects.
 		// If this is an aggregate error, then we can inspect each error
