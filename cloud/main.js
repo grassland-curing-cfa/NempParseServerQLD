@@ -3784,7 +3784,7 @@ Parse.Cloud.define("automateFinaliseData", function(request, response) {
 		} else
 			response.success({"ToCreate": ToCreate, 'executionMsg': executionMsg, 'isJobAdded': isJobAdded});
 	}, function(error) {
-		response.error("Error: " + error);
+		response.error({"ToCreate": ToCreate, 'executionMsg': executionMsg, 'isJobAdded': isJobAdded});
 	});
 });
 
