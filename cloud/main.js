@@ -11,6 +11,7 @@
 											  1. additional fields "LocationStatus" & "DistrctName"  added to the observation report; also
 											  2. list all mandatory locations including those with no observation or validation.
 											  GAE VERSION AT 3-11
+								11/07/2018: Created two cloud functions: "automateRunModel" & "automateFinaliseData" on the Parse Server for automating RunModel and FinaliseData jobs
 
  * 
  */
