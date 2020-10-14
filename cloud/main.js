@@ -241,7 +241,7 @@ Parse.Cloud.define("sendEmailWelcomeNewUser", function(request, response) {
 	'</ul>' + '<br>' + 
 	'<p>Once you have logged on, you can select &#34;Enter Observations&#34;, and click on your observation site. You can then enter your curing observation from the drop-down list as well as providing a height, cover and fuel load estimate. When you are finished, click &#34;Submit Observation&#34; at the bottom of the page.</p>' + '<br>' + 
 	'<p>Observations can be entered anytime during the week up until <strong>Wednesday morning at 9am</strong>. On <strong>Wednesday afternoon</strong>, a trial curing map will be published and sent to all observers via email. We hope to continue this process on a weekly basis for the duration of the fire season.</p>' + '<br>' + 
-	'<p>Once again, we thank you for your interest. Please contact us, Simon Dawson (<a href="mailto:simon.dawson@qfes.qld.gov.au">simon.dawson@qfes.qld.gov.au</a>) or Andrew Sturgess (<a href="mailto:Andrew.Sturgess@qfes.qld.gov.au">Andrew.Sturgess@qfes.qld.gov.au</a>) if you have any questions. We look forward to hearing from you soon.</p>' + '<br>' + 
+	'<p>Once again, we thank you for your interest. Please contact the QFES Predictive Services Unit at <a href="mailto:psu@qfes.qld.gov.au">psu@qfes.qld.gov.au</a> if you have any questions. We look forward to hearing from you soon.</p>' + '<br>' + 
 	'<p>Kind Regards,</p>' + 
 	'<p>The NEMP Grassland Curing Team</p>' + 
 	'<br>' + 
